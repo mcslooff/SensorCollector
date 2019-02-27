@@ -1,0 +1,83 @@
+  <html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      //google.charts.setOnLoadCallback(drawChart);
+	  
+	  function getData(variableURL, plotArea, chartTitle, lineColor) {
+	  	
+	  	var period = document.getElementById("period").value;
+	  	if(period!=null) {
+	  		variableURL += "?period=" + period;
+	  	}
+	  	
+		var jsonData = $.ajax({
+          url: variableURL,
+          dataType: "json"
+          }).done(function(data, textStatus, jqXHR) {
+			drawChart(plotArea, chartTitle, jqXHR.responseText, lineColor);
+			}
+		  ).fail( function() {
+		  		window.alert('Error');
+		  	}
+		  );
+	  }
+	  
+      function drawChart(plotArea, chartTitle, daData, lineColor) {
+		var data = new google.visualization.DataTable(daData);
+        var options = {
+          title: chartTitle,
+          curveType: 'function',
+          legend: { position: 'bottom' },
+          series: {
+          	0: {color : lineColor}
+          }
+        };
+        var chart = new google.visualization.LineChart(document.getElementById(plotArea));
+        chart.draw(data, options);
+      }
+      
+      var x1 = setInterval(function() {getData("/data/chart/temperature", "temp_chart", "Temperature", "#e2431e");}, 30000);
+      var x2 = setInterval(function() {getData("/data/chart/humidity", "hum_chart", "Humidity", "#43459d");}, 30000);
+      var x3 = setInterval(function() {getData("/data/chart/pressure", "air_chart", "Air pressure", "#1c91c0");}, 30000);
+      var x4 = setInterval(function() {getData("/data/chart/voc", "voc_chart", "VOC value", "#6f9654");}, 30000);
+      
+	  getData("/data/chart/temperature", "temp_chart", "Temperature", "#e2431e");
+	  getData("/data/chart/humidity", "hum_chart", "Humidity", "#43459d");
+	  getData("/data/chart/pressure", "air_chart", "Air pressure", "#1c91c0");
+	  getData("/data/chart/voc", "voc_chart", "VOC value", "#6f9654");
+      
+    </script>
+    <style>
+		.row {
+		  width: 100%;
+		}
+		
+		.block {
+		  width: 800px;
+		  height: 500px;
+		  display: inline-block;
+		}​    	
+    </style>
+  </head>
+  <body>
+  	<div class="row">
+  		<table>
+  			<tr>
+  				<td>Show</td>
+  				<td><input id="period" name="period" type="text" pattern="\d+" value="1800"> seconds of data</td>
+  			</tr>
+  		</table>
+  	</div>
+  	<div class="row">
+    	<div id="temp_chart" class="block"></div>
+    	<div id="hum_chart" class="block"></div>
+    </div>
+    <div class="row">
+    	<div id="air_chart" class="block"></div>
+    	<div id="voc_chart" class="block"></div>
+    </div>
+  </body>
+</html>
